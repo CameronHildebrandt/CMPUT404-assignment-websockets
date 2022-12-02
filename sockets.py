@@ -32,6 +32,7 @@ class World:
         # we've got listeners now!
         self.listeners = list()
         self.userNum = -1
+        self.websockets = []
         
     def add_set_listener(self, listener):
         self.listeners.append( listener )
@@ -68,7 +69,9 @@ def set_listener( entity, data ):
     # okay the listener heard somehting, webhook to all clients
     # ws.send()
 
-    print("sending to all")
+    print("sending to all", len(myWorld.websockets))
+    for ws in myWorld.websockets:
+        ws.send(json.dumps(myWorld.world()))
     # print("================================================")
     # print("entity:", entity)
     # print("data:", data)
@@ -115,14 +118,19 @@ def subscribe_socket(ws):
         "userNum": myWorld.userNum
     }))
 
+    myWorld.websockets.append(ws)
+
     while True: #echo
         data = ws.receive()
         # print("data rec:", data)
         # ws.send(myWorld.world())
 
-        # need to figure out how to push to all users, not just one
-        print("sending world:", myWorld.world())
+        # if(myWorld.sendWorld):
+        # # need to figure out how to push to all users, not just one
+        #     print("sending world:", myWorld.world())
+        #     myWorld.sendWorld = False
         # ws.send(json.dumps(myWorld.world()))
+
 
     # return None
 
