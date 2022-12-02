@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 import flask
-from flask import Flask, request
+from flask import Flask, request, redirect, jsonify
 from flask_sockets import Sockets
 import gevent
 from gevent import queue
@@ -31,6 +31,7 @@ class World:
         self.clear()
         # we've got listeners now!
         self.listeners = list()
+        self.userNum = -1
         
     def add_set_listener(self, listener):
         self.listeners.append( listener )
@@ -59,29 +60,71 @@ class World:
     def world(self):
         return self.space
 
-myWorld = World()        
+myWorld = World()
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
+
+    # okay the listener heard somehting, webhook to all clients
+    # ws.send()
+
+    print("sending to all")
+    # print("================================================")
+    # print("entity:", entity)
+    # print("data:", data)
+    # print("================================================")
+
+    # userNumber = 0
+    # try:
+    #     userNumber = request.json["userNum"]
+    #     data = request.json["data"]
+    # except:
+    #     pass
+    # myWorld.update(str(userNumber), entity, data)
+
+    return None
 
 myWorld.add_set_listener( set_listener )
         
 @app.route('/')
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return None
+    return redirect('/static/index.html', code=302)
 
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
     # XXX: TODO IMPLEMENT ME
+    print("================================================")
+    print("read_ws")
+    print("================================================")
+
     return None
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
-    # XXX: TODO IMPLEMENT ME
-    return None
+
+    myWorld.userNum += 1
+
+    print("Welcome, user", myWorld.userNum)
+
+    # ws.send(myWorld.userNum)
+    ws.send(json.dumps({
+        "request": "initHandshake",
+        "userNum": myWorld.userNum
+    }))
+
+    while True: #echo
+        data = ws.receive()
+        # print("data rec:", data)
+        # ws.send(myWorld.world())
+
+        # need to figure out how to push to all users, not just one
+        print("sending world:", myWorld.world())
+        # ws.send(json.dumps(myWorld.world()))
+
+    # return None
 
 
 # I give this to you, this is how you get the raw body/data portion of a post in flask
@@ -99,23 +142,41 @@ def flask_post_json():
 @app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
     '''update the entities via this interface'''
-    return None
+    userNumber = 0
+    data = request.json
+    try:
+        userNumber = request.json["userNum"]
+        data = request.json["data"]
+    except:
+        pass
+    myWorld.update(str(userNumber), entity, data)
+
+    # print("en:", entity)
+    # print("wr:", myWorld.world())
+
+    res = myWorld.get(entity)
+    return jsonify(res), 200, {'Content-Type': 'application/json'}
 
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
-    return None
+    return jsonify(myWorld.world()), 200, {'Content-Type': 'application/json'}
+    # return None
 
 @app.route("/entity/<entity>")    
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
-    return None
+    res = myWorld.get(entity)
+    return jsonify(res), 200, {'Content-Type': 'application/json'}
+    # return None
 
 
 @app.route("/clear", methods=['POST','GET'])
 def clear():
     '''Clear the world out!'''
-    return None
+    myWorld.clear()
+    res = {}
+    return jsonify(res), 200, {'Content-Type': 'application/json'}
 
 
 
