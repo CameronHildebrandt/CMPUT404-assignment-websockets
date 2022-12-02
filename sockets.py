@@ -71,7 +71,10 @@ def set_listener( entity, data ):
 
     print("sending to all", len(myWorld.websockets))
     for ws in myWorld.websockets:
-        ws.send(json.dumps(myWorld.world()))
+        try:
+            ws.send(json.dumps(myWorld.world()))
+        except:
+            pass #this will happen if we have dead wsockets
     # print("================================================")
     # print("entity:", entity)
     # print("data:", data)

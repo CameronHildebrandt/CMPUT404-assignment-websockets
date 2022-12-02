@@ -23,7 +23,7 @@
     <script src="json2.js"></script>
   </head> 
   <body bgcolor="white" height="100%" width="100%"> 
-    <div id="debug"></div>
+    <div id="debug" style="display: none"></div>
     <canvas id="c" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
 
     <script>
@@ -44,6 +44,7 @@ function debug(str) {
 debug("Test");
 
 world = {};
+otherUsersWorlds = {};
 
 function sendJSONXMLHTTPRequest(url, objects, callback) {
     var xhr = new XMLHttpRequest();
@@ -118,6 +119,16 @@ function renderFrame() {
         var entity = world[key];
         drawCircle(context,prepEntity(entity));
     }
+
+    for (var w in otherUsersWorlds) {
+        if(w.toString() !== userNum.toString()) {
+            // console.log(otherUsersWorlds[w])
+            for (var key in otherUsersWorlds[w]) {
+                var entity = otherUsersWorlds[w][key];
+                drawCircle(context,prepEntity(entity));
+            }
+        }
+    }
 }
 
 var drawNext = true;
@@ -159,7 +170,7 @@ function addEntity(entity, data) {
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
 
-    console.log("dada", data, "entitiy:", entity);
+    // console.log("dada", data, "entitiy:", entity);
     // socket.send(JSON.stringify(data)) // send using websocket?
     send = {
         "data": data,
@@ -274,9 +285,8 @@ mouse = (function() {
 
 function update() {
     drawFrame();
-    // socket.send("1234")
-
-    // draw the other users
+    drawNextFrame();
+    // draw the other users (happens interlnally when updating websockets)
 }
 
 
@@ -302,11 +312,13 @@ function wsSetup() {
     };
     socket.onmessage = function(msg) {
         try {
-            debug("WebSocket Recv:" + msg.data);
+            // debug("WebSocket Recv:" + msg.data);
             console.log("WebSocket Recv:", msg.data);
             //XXX: TODO What are you going to do here?
 
             contents = JSON.parse(msg.data);
+
+            console.log("conts", contents);
 
             // Figure out what request this is
             if(contents && contents.request) {
@@ -314,9 +326,9 @@ function wsSetup() {
                     userNum = contents.userNum;
                     initWorld();
                 }
-
-                // constntly update the frontends perspective of the world with the websoicket posts
-
+            } else { // received a ws that isn't init - update the world representation
+                console.log("rec world", contents)
+                otherUsersWorlds = contents;
             }
 
 
