@@ -122,7 +122,6 @@ function renderFrame() {
 
     for (var w in otherUsersWorlds) {
         if(w.toString() !== userNum.toString()) {
-            // console.log(otherUsersWorlds[w])
             for (var key in otherUsersWorlds[w]) {
                 var entity = otherUsersWorlds[w][key];
                 drawCircle(context,prepEntity(entity));
@@ -291,7 +290,7 @@ function update() {
 
 
 function wsSetup() {
-    var url = "ws://"+host+"/subscribe";   
+    var url = "ws://"+host+"/subscribeMU";   
     socket = new WebSocket(url);
     socket.onopen = function() {
         // Initializing, figure out your client number
@@ -313,12 +312,10 @@ function wsSetup() {
     socket.onmessage = function(msg) {
         try {
             // debug("WebSocket Recv:" + msg.data);
-            console.log("WebSocket Recv:", msg.data);
+            // console.log("WebSocket Recv:", msg.data);
             //XXX: TODO What are you going to do here?
 
             contents = JSON.parse(msg.data);
-
-            console.log("conts", contents);
 
             // Figure out what request this is
             if(contents && contents.request) {
@@ -327,7 +324,7 @@ function wsSetup() {
                     initWorld();
                 }
             } else { // received a ws that isn't init - update the world representation
-                console.log("rec world", contents)
+                // console.log("rec world", contents)
                 otherUsersWorlds = contents;
             }
 
@@ -346,19 +343,19 @@ wsSetup();
 
 function initWorld() {
     // 30 frames per second
-    // setInterval( update, 1000/30.0);
-    setInterval( update, 1000/165.0);
+    setInterval( update, 1000/30.0);
+    // setInterval( update, 1000/165.0);
 
     console.log("welcome user", userNum);
 
     userColours = [
         ['#2100ff', '#2502fa', '#2904f6', '#2d07f2', '#3109ed', '#350ce9', '#3a0ee5', '#3e11e1', '#4213dc', '#4616d8', '#4a18d4', '#4f1acf', '#531dcb', '#571fc7', '#5b22c3', '#5f24be', '#6327ba', '#6829b6', '#6c2cb1', '#702ead', '#7430a9', '#7833a4', '#7d35a0', '#81389c', '#853a98', '#893d93', '#8d3f8f', '#91428b', '#964487', '#9a4782', '#9e497e', '#a24b7a', '#a64e75', '#ab5071', '#af536d', '#b35569', '#b75864', '#bb5a60', '#bf5d5c', '#c45f57', '#c86153', '#cc644f', '#d0664b', '#d46946', '#d96b42', '#dd6e3e', '#e17039', '#e57335', '#e97531', '#ed772d', '#ed772d', '#e97531', '#e57335', '#e17039', '#dd6e3e', '#d96b42', '#d46946', '#d0664b', '#cc644f', '#c86153', '#c45f57', '#bf5d5c', '#bb5a60', '#b75864', '#b35569', '#af536d', '#ab5071', '#a64e75', '#a24b7a', '#9e497e', '#9a4782', '#964487', '#91428b', '#8d3f8f', '#893d93', '#853a98', '#81389c', '#7d35a0', '#7833a4', '#7430a9', '#702ead', '#6c2cb1', '#6829b6', '#6327ba', '#5f24be', '#5b22c3', '#571fc7', '#531dcb', '#4f1acf', '#4a18d4', '#4616d8', '#4213dc', '#3e11e1', '#3a0ee5', '#350ce9', '#3109ed', '#2d07f2', '#2904f6', '#2502fa', '#2100ff'],
         ['#ff0039', '#fe003c', '#fe013f', '#fd0243', '#fd0346', '#fd0449', '#fc054d', '#fc0650', '#fc0753', '#fb0857', '#fb095a', '#fb0a5d', '#fa0b61', '#fa0b64', '#fa0c67', '#f90d6b', '#f90e6e', '#f90f71', '#f81075', '#f81178', '#f8127b', '#f7137f', '#f71482', '#f71585', '#f61689', '#f6168c', '#f51790', '#f51893', '#f51996', '#f41a9a', '#f41b9d', '#f41ca0', '#f31da4', '#f31ea7', '#f31faa', '#f220ae', '#f221b1', '#f221b4', '#f122b8', '#f123bb', '#f124be', '#f025c2', '#f026c5', '#f027c8', '#ef28cc', '#ef29cf', '#ef2ad2', '#ee2bd6', '#ee2cd9', '#ee2cdc', '#ee2cdc', '#ee2cd9', '#ee2bd6', '#ef2ad2', '#ef29cf', '#ef28cc', '#f027c8', '#f026c5', '#f025c2', '#f124be', '#f123bb', '#f122b8', '#f221b4', '#f221b1', '#f220ae', '#f31faa', '#f31ea7', '#f31da4', '#f41ca0', '#f41b9d', '#f41a9a', '#f51996', '#f51893', '#f51790', '#f6168c', '#f61689', '#f71585', '#f71482', '#f7137f', '#f8127b', '#f81178', '#f81075', '#f90f71', '#f90e6e', '#f90d6b', '#fa0c67', '#fa0b64', '#fa0b61', '#fb0a5d', '#fb095a', '#fb0857', '#fc0753', '#fc0650', '#fc054d', '#fd0449', '#fd0346', '#fd0243', '#fe013f', '#fe003c', '#ff0039'],
-        ['#3700ff', '#3a00fe', '#3e01fd', '#4202fc', '#4503fc', '#4904fb', '#4d05fa', '#5106fa', '#5407f9', '#5808f8', '#5c09f8', '#600af7', '#630bf6', '#670bf5', '#6b0cf5', '#6f0df4', '#720ef3', '#760ff3', '#7a10f2', '#7d11f1', '#8112f1', '#8513f0', '#8914ef', '#8c15ef', '#9016ee', '#9416ed', '#9817ec', '#9b18ec', '#9f19eb', '#a31aea', '#a71bea', '#aa1ce9', '#ae1de8', '#b21ee8', '#b51fe7', '#b920e6', '#bd21e6', '#c121e5', '#c422e4', '#c823e3', '#cc24e3', '#d025e2', '#d326e1', '#d727e1', '#db28e0', '#df29df', '#e22adf', '#e62bde', '#ea2cdd', '#ed2cdd', '#ed2cdd', '#ea2cdd', '#e62bde', '#e22adf', '#df29df', '#db28e0', '#d727e1', '#d326e1', '#d025e2', '#cc24e3', '#c823e3', '#c422e4', '#c121e5', '#bd21e6', '#b920e6', '#b51fe7', '#b21ee8', '#ae1de8', '#aa1ce9', '#a71bea', '#a31aea', '#9f19eb', '#9b18ec', '#9817ec', '#9416ed', '#9016ee', '#8c15ef', '#8914ef', '#8513f0', '#8112f1', '#7d11f1', '#7a10f2', '#760ff3', '#720ef3', '#6f0df4', '#6b0cf5', '#670bf5', '#630bf6', '#600af7', '#5c09f8', '#5808f8', '#5407f9', '#5106fa', '#4d05fa', '#4904fb', '#4503fc', '#4202fc', '#3e01fd', '#3a00fe', '#3700ff'],
+        ['#ff0021', '#fe0321', '#fe0721', '#fd0c21', '#fd0f21', '#fd1322', '#fc1822', '#fc1c22', '#fc1f22', '#fb2423', '#fb2723', '#fb2b23', '#fa3023', '#fa3324', '#fa3824', '#f93b24', '#f93f24', '#f94425', '#f84825', '#f84c25', '#f84f25', '#f75426', '#f75726', '#f75c26', '#f66026', '#f66427', '#f56727', '#f56b27', '#f57027', '#f47428', '#f47728', '#f47b28', '#f37f28', '#f38429', '#f38829', '#f28b29', '#f29029', '#f2942a', '#f1982a', '#f19b2a', '#f19f2a', '#f0a42b', '#f0a82b', '#f0ac2b', '#efaf2b', '#efb32c', '#efb82c', '#eebc2c', '#eec02c', '#eec32d', '#eec32d', '#eec02c', '#eebc2c', '#efb82c', '#efb32c', '#efaf2b', '#f0ac2b', '#f0a82b', '#f0a42b', '#f19f2a', '#f19b2a', '#f1982a', '#f2942a', '#f29029', '#f28b29', '#f38829', '#f38429', '#f37f28', '#f47b28', '#f47728', '#f47428', '#f57027', '#f56b27', '#f56727', '#f66427', '#f66026', '#f75c26', '#f75726', '#f75426', '#f84f25', '#f84c25', '#f84825', '#f94425', '#f93f24', '#f93b24', '#fa3824', '#fa3324', '#fa3023', '#fb2b23', '#fb2723', '#fb2423', '#fc1f22', '#fc1c22', '#fc1822', '#fd1322', '#fd0f21', '#fd0c21', '#fe0721', '#fe0321', '#ff0021'],
         ['#3700ff', '#3604fe', '#3609fe', '#360dfd', '#3612fd', '#3516fd', '#351bfc', '#351ffc', '#3524fc', '#3528fb', '#342dfb', '#3431fb', '#3436fa', '#343afa', '#343ffa', '#3343f9', '#3348f9', '#334cf9', '#3351f8', '#3355f8', '#325af8', '#325ef7', '#3263f7', '#3267f7', '#326cf6', '#3170f6', '#3175f5', '#3179f5', '#317ef5', '#3182f4', '#3087f4', '#308bf4', '#3090f3', '#3094f3', '#3099f3', '#2f9df2', '#2fa2f2', '#2fa6f2', '#2fabf1', '#2faff1', '#2eb4f1', '#2eb8f0', '#2ebdf0', '#2ec1f0', '#2ec6ef', '#2dcaef', '#2dcfef', '#2dd3ee', '#2dd8ee', '#2ddcee', '#2ddcee', '#2dd8ee', '#2dd3ee', '#2dcfef', '#2dcaef', '#2ec6ef', '#2ec1f0', '#2ebdf0', '#2eb8f0', '#2eb4f1', '#2faff1', '#2fabf1', '#2fa6f2', '#2fa2f2', '#2f9df2', '#3099f3', '#3094f3', '#3090f3', '#308bf4', '#3087f4', '#3182f4', '#317ef5', '#3179f5', '#3175f5', '#3170f6', '#326cf6', '#3267f7', '#3263f7', '#325ef7', '#325af8', '#3355f8', '#3351f8', '#334cf9', '#3348f9', '#3343f9', '#343ffa', '#343afa', '#3436fa', '#3431fb', '#342dfb', '#3528fb', '#3524fc', '#351ffc', '#351bfc', '#3516fd', '#3612fd', '#360dfd', '#3609fe', '#3604fe', '#3700ff'],
         ['#00ff37', '#00fe3a', '#01fd3e', '#02fc42', '#03fc45', '#04fb49', '#05fa4d', '#06fa51', '#07f954', '#08f858', '#09f85c', '#0af760', '#0bf663', '#0bf567', '#0cf56b', '#0df46f', '#0ef372', '#0ff376', '#10f27a', '#11f17d', '#12f181', '#13f085', '#14ef89', '#15ef8c', '#16ee90', '#16ed94', '#17ec98', '#18ec9b', '#19eb9f', '#1aeaa3', '#1beaa7', '#1ce9aa', '#1de8ae', '#1ee8b2', '#1fe7b5', '#20e6b9', '#21e6bd', '#21e5c1', '#22e4c4', '#23e3c8', '#24e3cc', '#25e2d0', '#26e1d3', '#27e1d7', '#28e0db', '#29dfdf', '#2adfe2', '#2bdee6', '#2cddea', '#2cdded', '#2cdded', '#2cddea', '#2bdee6', '#2adfe2', '#29dfdf', '#28e0db', '#27e1d7', '#26e1d3', '#25e2d0', '#24e3cc', '#23e3c8', '#22e4c4', '#21e5c1', '#21e6bd', '#20e6b9', '#1fe7b5', '#1ee8b2', '#1de8ae', '#1ce9aa', '#1beaa7', '#1aeaa3', '#19eb9f', '#18ec9b', '#17ec98', '#16ed94', '#16ee90', '#15ef8c', '#14ef89', '#13f085', '#12f181', '#11f17d', '#10f27a', '#0ff376', '#0ef372', '#0df46f', '#0cf56b', '#0bf567', '#0bf663', '#0af760', '#09f85c', '#08f858', '#07f954', '#06fa51', '#05fa4d', '#04fb49', '#03fc45', '#02fc42', '#01fd3e', '#00fe3a', '#00ff37'],
         ['#ff6f00', '#fe7100', '#fd7401', '#fc7602', '#fc7903', '#fb7b04', '#fa7e05', '#fa8106', '#f98307', '#f88608', '#f88809', '#f78b0a', '#f68e0b', '#f5900b', '#f5930c', '#f4950d', '#f3980e', '#f39b0f', '#f29d10', '#f1a011', '#f1a212', '#f0a513', '#efa814', '#efaa15', '#eead16', '#edaf16', '#ecb217', '#ecb418', '#ebb719', '#eaba1a', '#eabc1b', '#e9bf1c', '#e8c11d', '#e8c41e', '#e7c71f', '#e6c920', '#e6cc21', '#e5ce21', '#e4d122', '#e3d423', '#e3d624', '#e2d925', '#e1db26', '#e1de27', '#e0e128', '#dfe329', '#dfe62a', '#dee82b', '#ddeb2c', '#dded2c', '#dded2c', '#ddeb2c', '#dee82b', '#dfe62a', '#dfe329', '#e0e128', '#e1de27', '#e1db26', '#e2d925', '#e3d624', '#e3d423', '#e4d122', '#e5ce21', '#e6cc21', '#e6c920', '#e7c71f', '#e8c41e', '#e8c11d', '#e9bf1c', '#eabc1b', '#eaba1a', '#ebb719', '#ecb418', '#ecb217', '#edaf16', '#eead16', '#efaa15', '#efa814', '#f0a513', '#f1a212', '#f1a011', '#f29d10', '#f39b0f', '#f3980e', '#f4950d', '#f5930c', '#f5900b', '#f68e0b', '#f78b0a', '#f88809', '#f88608', '#f98307', '#fa8106', '#fa7e05', '#fb7b04', '#fc7903', '#fc7602', '#fd7401', '#fe7100', '#ff6f00'],
-        ['#ff0021', '#fe0321', '#fe0721', '#fd0c21', '#fd0f21', '#fd1322', '#fc1822', '#fc1c22', '#fc1f22', '#fb2423', '#fb2723', '#fb2b23', '#fa3023', '#fa3324', '#fa3824', '#f93b24', '#f93f24', '#f94425', '#f84825', '#f84c25', '#f84f25', '#f75426', '#f75726', '#f75c26', '#f66026', '#f66427', '#f56727', '#f56b27', '#f57027', '#f47428', '#f47728', '#f47b28', '#f37f28', '#f38429', '#f38829', '#f28b29', '#f29029', '#f2942a', '#f1982a', '#f19b2a', '#f19f2a', '#f0a42b', '#f0a82b', '#f0ac2b', '#efaf2b', '#efb32c', '#efb82c', '#eebc2c', '#eec02c', '#eec32d', '#eec32d', '#eec02c', '#eebc2c', '#efb82c', '#efb32c', '#efaf2b', '#f0ac2b', '#f0a82b', '#f0a42b', '#f19f2a', '#f19b2a', '#f1982a', '#f2942a', '#f29029', '#f28b29', '#f38829', '#f38429', '#f37f28', '#f47b28', '#f47728', '#f47428', '#f57027', '#f56b27', '#f56727', '#f66427', '#f66026', '#f75c26', '#f75726', '#f75426', '#f84f25', '#f84c25', '#f84825', '#f94425', '#f93f24', '#f93b24', '#fa3824', '#fa3324', '#fa3023', '#fb2b23', '#fb2723', '#fb2423', '#fc1f22', '#fc1c22', '#fc1822', '#fd1322', '#fd0f21', '#fd0c21', '#fe0721', '#fe0321', '#ff0021'],
+        ['#3700ff', '#3a00fe', '#3e01fd', '#4202fc', '#4503fc', '#4904fb', '#4d05fa', '#5106fa', '#5407f9', '#5808f8', '#5c09f8', '#600af7', '#630bf6', '#670bf5', '#6b0cf5', '#6f0df4', '#720ef3', '#760ff3', '#7a10f2', '#7d11f1', '#8112f1', '#8513f0', '#8914ef', '#8c15ef', '#9016ee', '#9416ed', '#9817ec', '#9b18ec', '#9f19eb', '#a31aea', '#a71bea', '#aa1ce9', '#ae1de8', '#b21ee8', '#b51fe7', '#b920e6', '#bd21e6', '#c121e5', '#c422e4', '#c823e3', '#cc24e3', '#d025e2', '#d326e1', '#d727e1', '#db28e0', '#df29df', '#e22adf', '#e62bde', '#ea2cdd', '#ed2cdd', '#ed2cdd', '#ea2cdd', '#e62bde', '#e22adf', '#df29df', '#db28e0', '#d727e1', '#d326e1', '#d025e2', '#cc24e3', '#c823e3', '#c422e4', '#c121e5', '#bd21e6', '#b920e6', '#b51fe7', '#b21ee8', '#ae1de8', '#aa1ce9', '#a71bea', '#a31aea', '#9f19eb', '#9b18ec', '#9817ec', '#9416ed', '#9016ee', '#8c15ef', '#8914ef', '#8513f0', '#8112f1', '#7d11f1', '#7a10f2', '#760ff3', '#720ef3', '#6f0df4', '#6b0cf5', '#670bf5', '#630bf6', '#600af7', '#5c09f8', '#5808f8', '#5407f9', '#5106fa', '#4d05fa', '#4904fb', '#4503fc', '#4202fc', '#3e01fd', '#3a00fe', '#3700ff'],
     ]
 
     mouse.mousedowners.push(function(x,y,clicked,e) {

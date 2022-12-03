@@ -62,31 +62,19 @@ class World:
         return self.space
 
 myWorld = World()
+singleClientWorld = World()
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
 
     # okay the listener heard somehting, webhook to all clients
-    # ws.send()
 
-    print("sending to all", len(myWorld.websockets))
+    # print("sending to all", len(myWorld.websockets))
     for ws in myWorld.websockets:
         try:
             ws.send(json.dumps(myWorld.world()))
         except:
-            pass #this will happen if we have dead wsockets
-    # print("================================================")
-    # print("entity:", entity)
-    # print("data:", data)
-    # print("================================================")
-
-    # userNumber = 0
-    # try:
-    #     userNumber = request.json["userNum"]
-    #     data = request.json["data"]
-    # except:
-    #     pass
-    # myWorld.update(str(userNumber), entity, data)
+            pass #this will happen if we have dead websockets
 
     return None
 
@@ -100,9 +88,24 @@ def hello():
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
     # XXX: TODO IMPLEMENT ME
-    print("================================================")
-    print("read_ws")
-    print("================================================")
+    # print("================================================")
+    # print("read_ws", ws, client)
+    # print("================================================")
+
+
+    # singleClientWorld.update(str(userNum), entity, data)
+
+    entity = "X76"
+    data = {'x': 665, 'y': 1018, 'colour': '#7d35a0', 'radius': 30}
+
+    singleClientWorld.update(str(0), entity, data)
+
+    for sock in singleClientWorld.websockets:
+        try:
+            sock.send(json.dumps(singleClientWorld.world()))
+        except:
+            pass #this will happen if we have dead websockets
+
 
     return None
 
@@ -111,9 +114,22 @@ def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
 
+    singleClientWorld.websockets.append(ws)
+    
+    while True: #echo
+        data = ws.receive()
+        read_ws(ws, data)
+        ws.send(data)
+
+
+@sockets.route('/subscribeMU')
+def subscribe_socket(ws):
+    '''Fulfill the websocket URL of /subscribe, every update notify the
+       websocket and read updates from the websocket '''
+
     myWorld.userNum += 1
 
-    print("Welcome, user", myWorld.userNum)
+    print("Welcome user", myWorld.userNum)
 
     # ws.send(myWorld.userNum)
     ws.send(json.dumps({
@@ -123,7 +139,7 @@ def subscribe_socket(ws):
 
     myWorld.websockets.append(ws)
 
-    while True: #echo
+    while True:
         data = ws.receive()
         # print("data rec:", data)
         # ws.send(myWorld.world())
@@ -158,6 +174,10 @@ def update(entity):
     try:
         userNumber = request.json["userNum"]
         data = request.json["data"]
+
+        # print("data", data)
+        # print("entity", entity)
+
     except:
         pass
     myWorld.update(str(userNumber), entity, data)
